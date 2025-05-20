@@ -1,0 +1,37 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Inherit
+      id: inherit
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Inherit
+        setup-command: ''
+        command: javac App.java && java App
+        input: |-
+          6
+          4
+        expected-output: |-
+          10
+          24
+          2
+        comparison-method: contains
+        timeout: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        INHERIT_RESULTS: "${{steps.inherit.outputs.result}}"
+      with:
+        runners: inherit
